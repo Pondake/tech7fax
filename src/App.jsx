@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import {
   Send,
   Loader2,
   CheckCircle,
@@ -35,6 +36,24 @@ const DEFAULT_HTML = `<p><strong>Date:</strong> ${today}</p>
 
 <p>Kind regards,<br>
 Your Name</p>`;
+
+const SEND_SIDE_PADDING = "18mm";
+
+function prepareForSend(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  doc.querySelectorAll("figure[data-fax-id]").forEach((fig) => {
+    const fullpage = fig.classList.contains("fax-image--fullpage");
+    Object.assign(fig.style, {
+      display: "block",
+      margin: fullpage ? `0 -${SEND_SIDE_PADDING}` : "0",
+      ...(fullpage && { width: `calc(100% + 36mm)` }),
+    });
+    const img = fig.querySelector("img");
+    if (img) Object.assign(img.style, { width: "100%", display: "block" });
+  });
+  return doc.body.innerHTML;
+}
 
 function updateImageInHtml(
   html,
@@ -115,7 +134,7 @@ export default function App() {
           ...(FAX_API_KEY ? { Authorization: `Bearer ${FAX_API_KEY}` } : {}),
         },
         body: JSON.stringify({
-          content: `<div style="padding: 28mm 22mm;">${htmlContent}</div>`,
+          content: `<style>html,body{margin:0;padding:0;overflow:hidden;}</style><div style="padding:0 ${SEND_SIDE_PADDING};">${prepareForSend(htmlContent)}</div>`,
           sender: "CYSO",
         }),
       });
