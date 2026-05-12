@@ -12,17 +12,18 @@ const PREVIEW_STYLES_DARK = `
   code { color: #c8b8a8 !important; }
 `
 
-const PREVIEW_STYLES = `
+export const PRINT_STYLES = `
   * { box-sizing: border-box; }
-  html { margin: 0; padding: 0; }
+  html, body { margin: 0; padding: 0; }
   body {
-    margin: 0;
-    padding: 28mm 22mm;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
     font-size: 11.5pt;
     line-height: 1.65;
     color: #1a1814;
     background: transparent;
+  }
+  .fax-content {
+    padding: 28mm 22mm;
   }
   img { max-width: 100%; height: auto; display: block; }
   h1, h2, h3, h4, h5, h6 { margin: 0.85em 0 0.4em; line-height: 1.3; }
@@ -99,6 +100,7 @@ const PREVIEW_STYLES = `
     transition: opacity 0.12s;
   }
 `
+
 
 const INTERACTIVE_SCRIPT = `
 <script>
@@ -221,9 +223,9 @@ export function FaxPreview({ html, onImageUpdate, dark = false }) {
 <html>
 <head>
 <meta charset="utf-8">
-<style>${PREVIEW_STYLES}${dark ? PREVIEW_STYLES_DARK : ''}</style>
+<style>${PRINT_STYLES}${dark ? PREVIEW_STYLES_DARK : ''}</style>
 </head>
-<body>${html}${INTERACTIVE_SCRIPT}</body>
+<body><div class="fax-content">${html}</div>${INTERACTIVE_SCRIPT}</body>
 </html>`,
     [html, dark],
   )
