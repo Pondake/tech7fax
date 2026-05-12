@@ -1,20 +1,27 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import {
-  Send, Loader2, CheckCircle, AlertCircle,
-  Copy, Sun, Moon, Monitor,
-} from 'lucide-react'
-import { Logo } from './Logo.jsx'
-import { HtmlEditor } from './HtmlEditor.jsx'
-import { FaxPreview, PRINT_STYLES } from './FaxPreview.jsx'
-import { ImagePanel } from './ImagePanel.jsx'
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+  Send,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  Copy,
+  Sun,
+  Moon,
+  Monitor,
+} from "lucide-react";
+import { Logo } from "./Logo.jsx";
+import { HtmlEditor } from "./HtmlEditor.jsx";
+import { FaxPreview } from "./FaxPreview.jsx";
+import { ImagePanel } from "./ImagePanel.jsx";
 
-const FAX_ENDPOINT = import.meta.env.VITE_FAX_ENDPOINT ?? '/api'
-const FAX_API_KEY  = import.meta.env.VITE_FAX_API_KEY  ?? ''
+const FAX_ENDPOINT = import.meta.env.VITE_FAX_ENDPOINT ?? "/api";
+const FAX_API_KEY = import.meta.env.VITE_FAX_API_KEY ?? "";
 
-const today = new Date().toLocaleDateString('en-GB', {
-  day: '2-digit', month: 'long', year: 'numeric',
-})
+const today = new Date().toLocaleDateString("en-GB", {
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+});
 
 const DEFAULT_HTML = `<p><strong>Date:</strong> ${today}</p>
 
@@ -27,93 +34,102 @@ const DEFAULT_HTML = `<p><strong>Date:</strong> ${today}</p>
 <p>&nbsp;</p>
 
 <p>Kind regards,<br>
-Your Name</p>`
+Your Name</p>`;
 
-function updateImageInHtml(html, { imageId, float, marginLeft, marginRight, width }) {
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(html, 'text/html')
-  const fig = doc.querySelector(`figure[data-fax-id="${imageId}"]`)
-  if (!fig) return html
-  if (float !== undefined)       fig.style.float       = float
-  if (marginLeft !== undefined)  fig.style.marginLeft  = marginLeft
-  if (marginRight !== undefined) fig.style.marginRight = marginRight
+function updateImageInHtml(
+  html,
+  { imageId, float, marginLeft, marginRight, width },
+) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const fig = doc.querySelector(`figure[data-fax-id="${imageId}"]`);
+  if (!fig) return html;
+  if (float !== undefined) fig.style.float = float;
+  if (marginLeft !== undefined) fig.style.marginLeft = marginLeft;
+  if (marginRight !== undefined) fig.style.marginRight = marginRight;
   if (width) {
-    fig.style.width = width
-    const img = fig.querySelector('img')
-    if (img) img.style.width = '100%'
+    fig.style.width = width;
+    const img = fig.querySelector("img");
+    if (img) img.style.width = "100%";
   }
-  return doc.body.innerHTML
+  return doc.body.innerHTML;
 }
 
 export default function App() {
-  const { t, i18n }               = useTranslation()
-  const [htmlContent, setHtml]    = useState(DEFAULT_HTML)
-  const [images, setImages]       = useState([])
-  const [sendStatus, setSend]     = useState(null)
-  const [isDark, setIsDark]       = useState(false)
-  const [darkCanvas, setDarkCanvas] = useState(false)
+  const { t, i18n } = useTranslation();
+  const [htmlContent, setHtml] = useState(DEFAULT_HTML);
+  const [images, setImages] = useState([]);
+  const [sendStatus, setSend] = useState(null);
+  const [isDark, setIsDark] = useState(false);
+  const [darkCanvas, setDarkCanvas] = useState(false);
 
-  const editorViewRef = useRef(null)
+  const editorViewRef = useRef(null);
 
   // Apply theme to document root
   useEffect(() => {
-    document.documentElement.dataset.theme = isDark ? 'dark' : 'light'
-  }, [isDark])
+    document.documentElement.dataset.theme = isDark ? "dark" : "light";
+  }, [isDark]);
 
   const toggleLang = useCallback(() => {
-    i18n.changeLanguage(i18n.language === 'en' ? 'nl' : 'en')
-  }, [i18n])
+    i18n.changeLanguage(i18n.language === "en" ? "nl" : "en");
+  }, [i18n]);
 
   const insertAtCursor = useCallback((text) => {
-    const view = editorViewRef.current
-    if (!view) return
-    const cursor = view.state.selection.main.head
+    const view = editorViewRef.current;
+    if (!view) return;
+    const cursor = view.state.selection.main.head;
     view.dispatch({
       changes: { from: cursor, insert: text },
       selection: { anchor: cursor + text.length },
-    })
-    view.focus()
-  }, [])
+    });
+    view.focus();
+  }, []);
 
-  const handleInsertImage = useCallback((image) => {
-    const snippet =
-      image.mode === 'fullpage'
-        ? `<figure class="fax-image fax-image--fullpage" data-fax-id="${image.id}">\n  <img src="${image.dataUrl}" alt="${image.name}">\n</figure>\n`
-        : `<figure class="fax-image" data-fax-id="${image.id}">\n  <img src="${image.dataUrl}" alt="${image.name}">\n</figure>\n`
-    insertAtCursor(snippet)
-  }, [insertAtCursor])
+  const handleInsertImage = useCallback(
+    (image) => {
+      const snippet =
+        image.mode === "fullpage"
+          ? `<figure class="fax-image fax-image--fullpage" data-fax-id="${image.id}">\n  <img src="${image.dataUrl}" alt="${image.name}">\n</figure>\n`
+          : `<figure class="fax-image" data-fax-id="${image.id}">\n  <img src="${image.dataUrl}" alt="${image.name}">\n</figure>\n`;
+      insertAtCursor(snippet);
+    },
+    [insertAtCursor],
+  );
 
   const handleImageUpdate = useCallback((update) => {
-    setHtml((prev) => updateImageInHtml(prev, update))
-  }, [])
+    setHtml((prev) => updateImageInHtml(prev, update));
+  }, []);
 
   const handleCopyHtml = useCallback(() => {
-    navigator.clipboard.writeText(htmlContent)
-  }, [htmlContent])
+    navigator.clipboard.writeText(htmlContent);
+  }, [htmlContent]);
 
   const handleSend = useCallback(async () => {
-    if (sendStatus === 'sending') return
-    setSend('sending')
+    if (sendStatus === "sending") return;
+    setSend("sending");
     try {
       const res = await fetch(`${FAX_ENDPOINT}/html`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           ...(FAX_API_KEY ? { Authorization: `Bearer ${FAX_API_KEY}` } : {}),
         },
-        body: JSON.stringify({ content: `<div style="padding: 28mm 22mm;">${htmlContent}</div>`, sender: 'CYSO' }),
-      })
+        body: JSON.stringify({
+          content: `<div style="padding: 28mm 22mm;">${htmlContent}</div>`,
+          sender: "CYSO",
+        }),
+      });
       if (!res.ok) {
-        const text = await res.text().catch(() => res.statusText)
-        setSend({ ok: false, msg: `${res.status}: ${text}` })
+        const text = await res.text().catch(() => res.statusText);
+        setSend({ ok: false, msg: `${res.status}: ${text}` });
       } else {
-        setSend({ ok: true })
-        setTimeout(() => setSend(null), 6000)
+        setSend({ ok: true });
+        setTimeout(() => setSend(null), 6000);
       }
     } catch (err) {
-      setSend({ ok: false, msg: err.message })
+      setSend({ ok: false, msg: err.message });
     }
-  }, [htmlContent, sendStatus])
+  }, [htmlContent, sendStatus]);
 
   return (
     <div className="app">
@@ -126,19 +142,19 @@ export default function App() {
         <div className="header-spacer" />
 
         {/* Status */}
-        {sendStatus === 'sending' && (
+        {sendStatus === "sending" && (
           <span className="chip chip--sending">
-            <Loader2 size={12} className="spin" /> {t('sending')}
+            <Loader2 size={12} className="spin" /> {t("sending")}
           </span>
         )}
         {sendStatus?.ok === true && (
           <span className="chip chip--sent">
-            <CheckCircle size={12} /> {t('sent')}
+            <CheckCircle size={12} /> {t("sent")}
           </span>
         )}
         {sendStatus?.ok === false && (
           <span className="chip chip--error" title={sendStatus.msg}>
-            <AlertCircle size={12} /> {t('send_failed')}
+            <AlertCircle size={12} /> {t("send_failed")}
           </span>
         )}
 
@@ -148,25 +164,29 @@ export default function App() {
         <button
           className="toggle-btn"
           onClick={toggleLang}
-          title={i18n.language === 'en' ? 'Switch to Dutch' : 'Overschakelen naar Engels'}
+          title={
+            i18n.language === "en"
+              ? "Switch to Dutch"
+              : "Overschakelen naar Engels"
+          }
         >
-          {t('lang_toggle')}
+          {t("lang_toggle")}
         </button>
 
         {/* App dark mode */}
         <button
           className="toggle-btn"
           onClick={() => setIsDark((d) => !d)}
-          title={t(isDark ? 'to_light' : 'to_dark')}
+          title={t(isDark ? "to_light" : "to_dark")}
         >
           {isDark ? <Sun size={14} /> : <Moon size={14} />}
         </button>
 
         {/* Preview canvas dark/light */}
         <button
-          className={`toggle-btn${darkCanvas ? ' toggle-btn--on' : ''}`}
+          className={`toggle-btn${darkCanvas ? " toggle-btn--on" : ""}`}
           onClick={() => setDarkCanvas((d) => !d)}
-          title={t(darkCanvas ? 'canvas_light' : 'canvas_dark')}
+          title={t(darkCanvas ? "canvas_light" : "canvas_dark")}
         >
           <Monitor size={14} />
         </button>
@@ -177,25 +197,32 @@ export default function App() {
         <button
           className="send-btn"
           onClick={handleSend}
-          disabled={sendStatus === 'sending'}
+          disabled={sendStatus === "sending"}
         >
-          {sendStatus === 'sending' ? (
-            <><Loader2 size={14} className="spin" /> {t('sending')}</>
+          {sendStatus === "sending" ? (
+            <>
+              <Loader2 size={14} className="spin" /> {t("sending")}
+            </>
           ) : (
-            <><Send size={14} /> {t('send_fax')}</>
+            <>
+              <Send size={14} /> {t("send_fax")}
+            </>
           )}
         </button>
       </header>
 
       {/* ── Body ────────────────────────────────────────────────── */}
       <div className="app-body">
-
         {/* Left: compose pane */}
         <div className="left-pane">
           <div className="section-label">
-            {t('html_content')}
+            {t("html_content")}
             <div className="section-label__actions">
-              <button className="icon-btn" onClick={handleCopyHtml} title={t('copy_html')}>
+              <button
+                className="icon-btn"
+                onClick={handleCopyHtml}
+                title={t("copy_html")}
+              >
                 <Copy size={13} />
               </button>
             </div>
@@ -204,7 +231,9 @@ export default function App() {
             <HtmlEditor
               value={htmlContent}
               onChange={setHtml}
-              onViewReady={(view) => { editorViewRef.current = view }}
+              onViewReady={(view) => {
+                editorViewRef.current = view;
+              }}
               dark={isDark}
             />
           </div>
@@ -216,14 +245,21 @@ export default function App() {
         </div>
 
         {/* Right: preview pane */}
-        <div className={`right-pane${darkCanvas ? ' right-pane--canvas-dark' : ''}`}>
-          <p className="preview-label">{t('live_preview')} — {t('preview_hint')}</p>
+        <div
+          className={`right-pane${darkCanvas ? " right-pane--canvas-dark" : ""}`}
+        >
+          <p className="preview-label">
+            {t("live_preview")} — {t("preview_hint")}
+          </p>
           <div className="preview-paper">
-            <FaxPreview html={htmlContent} onImageUpdate={handleImageUpdate} dark={darkCanvas} />
+            <FaxPreview
+              html={htmlContent}
+              onImageUpdate={handleImageUpdate}
+              dark={darkCanvas}
+            />
           </div>
         </div>
-
       </div>
     </div>
-  )
+  );
 }

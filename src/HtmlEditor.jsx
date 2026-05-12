@@ -2,6 +2,8 @@ import { useCallback, useMemo } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { html } from '@codemirror/lang-html'
 import { EditorView } from '@codemirror/view'
+import { syntaxHighlighting } from '@codemirror/language'
+import { oneDarkHighlightStyle } from '@codemirror/theme-one-dark'
 
 function createTheme(dark) {
   return EditorView.theme(
@@ -69,7 +71,12 @@ function createTheme(dark) {
 }
 
 export function HtmlEditor({ value, onChange, onViewReady, dark = false }) {
-  const theme = useMemo(() => createTheme(dark), [dark])
+  const extensions = useMemo(() => {
+    const exts = [html()]
+    if (dark) exts.push(syntaxHighlighting(oneDarkHighlightStyle))
+    exts.push(createTheme(dark))
+    return exts
+  }, [dark])
 
   const handleCreate = useCallback(
     (view) => { onViewReady?.(view) },
@@ -80,7 +87,7 @@ export function HtmlEditor({ value, onChange, onViewReady, dark = false }) {
     <CodeMirror
       value={value}
       onChange={onChange}
-      extensions={[html(), theme]}
+      extensions={extensions}
       onCreateEditor={handleCreate}
       height="100%"
       style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
