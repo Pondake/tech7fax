@@ -14,7 +14,7 @@ const PREVIEW_STYLES_DARK = `
 
 export const PRINT_STYLES = `
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
+  html, body { margin: 0; padding: 0; overflow-x: hidden; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
     font-size: 11.5pt;
@@ -23,12 +23,12 @@ export const PRINT_STYLES = `
     background: transparent;
   }
   .fax-content {
-    padding: 28mm 22mm;
+    padding: 12mm 18mm 15mm;
   }
   img { max-width: 100%; height: auto; display: block; }
   h1, h2, h3, h4, h5, h6 { margin: 0.85em 0 0.4em; line-height: 1.3; }
   p { margin: 0 0 0.8em; }
-  ul, ol { margin: 0 0 0.8em 1.4em; }
+  ul, ol { margin: 0 0 0.8em; padding-left: 1.4em; }
   li { margin-bottom: 0.25em; }
   hr { border: none; border-top: 1px solid #d8d4cc; margin: 1.4em 0; }
   table { border-collapse: collapse; width: 100%; margin-bottom: 1em; }
@@ -58,7 +58,7 @@ export const PRINT_STYLES = `
   }
   .fax-image img { max-width: 100%; }
   .fax-image--fullpage {
-    margin: 0 -22mm;
+    margin: 0 -18mm;
     page-break-before: always;
     page-break-after: always;
   }
@@ -101,6 +101,26 @@ export const PRINT_STYLES = `
   }
 `
 
+const PREVIEW_GUIDE_STYLES = `
+  .fax-content {
+    background-image:
+      linear-gradient(180deg, rgba(99,132,185,0.08) 12mm, transparent 12mm),
+      linear-gradient(90deg,  rgba(99,132,185,0.08) 18mm, transparent 18mm),
+      linear-gradient(-90deg, rgba(99,132,185,0.08) 18mm, transparent 18mm);
+    position: relative;
+  }
+  .fax-content::after {
+    content: 'page 2 ↓';
+    position: absolute;
+    left: 0; right: 0;
+    top: 297mm;
+    border-top: 1px dashed rgba(200, 60, 60, 0.45);
+    font-size: 8pt;
+    color: rgba(200, 60, 60, 0.5);
+    padding: 2px 18mm 0;
+    pointer-events: none;
+  }
+`
 
 const INTERACTIVE_SCRIPT = `
 <script>
@@ -223,7 +243,7 @@ export function FaxPreview({ html, onImageUpdate, dark = false }) {
 <html>
 <head>
 <meta charset="utf-8">
-<style>${PRINT_STYLES}${dark ? PREVIEW_STYLES_DARK : ''}</style>
+<style>${PRINT_STYLES}${PREVIEW_GUIDE_STYLES}${dark ? PREVIEW_STYLES_DARK : ''}</style>
 </head>
 <body><div class="fax-content">${html}</div>${INTERACTIVE_SCRIPT}</body>
 </html>`,
