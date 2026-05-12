@@ -6,10 +6,10 @@ import {
 } from 'lucide-react'
 import { Logo } from './Logo.jsx'
 import { HtmlEditor } from './HtmlEditor.jsx'
-import { FaxPreview } from './FaxPreview.jsx'
+import { FaxPreview, PRINT_STYLES } from './FaxPreview.jsx'
 import { ImagePanel } from './ImagePanel.jsx'
 
-const FAX_ENDPOINT = import.meta.env.VITE_FAX_ENDPOINT ?? 'YOUR_FAX_ENDPOINT_HERE'
+const FAX_ENDPOINT = import.meta.env.VITE_FAX_ENDPOINT ?? '/api'
 const FAX_API_KEY  = import.meta.env.VITE_FAX_API_KEY  ?? ''
 
 const today = new Date().toLocaleDateString('en-GB', {
@@ -95,13 +95,13 @@ export default function App() {
     if (sendStatus === 'sending') return
     setSend('sending')
     try {
-      const res = await fetch(`${FAX_ENDPOINT}/fax`, {
+      const res = await fetch(`${FAX_ENDPOINT}/html`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(FAX_API_KEY ? { Authorization: `Bearer ${FAX_API_KEY}` } : {}),
         },
-        body: JSON.stringify({ html: htmlContent }),
+        body: JSON.stringify({ content: `<div style="padding: 28mm 22mm;">${htmlContent}</div>`, sender: 'CYSO' }),
       })
       if (!res.ok) {
         const text = await res.text().catch(() => res.statusText)
