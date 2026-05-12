@@ -9,11 +9,13 @@ import {
   Sun,
   Moon,
   Monitor,
+  Lock,
 } from "lucide-react";
 import { Logo } from "./Logo.jsx";
 import { HtmlEditor } from "./HtmlEditor.jsx";
 import { FaxPreview } from "./FaxPreview.jsx";
 import { ImagePanel } from "./ImagePanel.jsx";
+import { useLock } from "./PasswordGate.jsx";
 
 const FAX_ENDPOINT = import.meta.env.VITE_FAX_ENDPOINT ?? "/api";
 const FAX_API_KEY = import.meta.env.VITE_FAX_API_KEY ?? "";
@@ -76,6 +78,7 @@ function updateImageInHtml(
 
 export default function App() {
   const { t, i18n } = useTranslation();
+  const lock = useLock();
   const [htmlContent, setHtml] = useState(DEFAULT_HTML);
   const [images, setImages] = useState([]);
   const [sendStatus, setSend] = useState(null);
@@ -208,6 +211,15 @@ export default function App() {
           title={t(darkCanvas ? "canvas_light" : "canvas_dark")}
         >
           <Monitor size={14} />
+        </button>
+
+        {/* Lock */}
+        <button
+          className="toggle-btn"
+          onClick={lock}
+          title="Lock"
+        >
+          <Lock size={14} />
         </button>
 
         <div className="header-divider" />
