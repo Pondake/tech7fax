@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { Lock, AlertCircle } from "lucide-react";
-import { Logo } from "./Logo.jsx";
+import { Logo } from "./components/Logo.jsx";
 
 const SITE_PASSWORD = import.meta.env.VITE_SITE_PASSWORD ?? "";
 const STORAGE_KEY = "tech7fax:auth";
