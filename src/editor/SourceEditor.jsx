@@ -8,19 +8,13 @@ import { oneDarkHighlightStyle } from '@codemirror/theme-one-dark'
 function createTheme(dark) {
   return EditorView.theme(
     {
-      '&': {
-        backgroundColor: 'var(--surface)',
-        color: 'var(--text)',
-      },
+      '&': { backgroundColor: 'var(--surface)', color: 'var(--text)' },
       '.cm-scroller': {
-        fontFamily: '"JetBrains Mono", "Cascadia Code", "Fira Code", monospace',
+        fontFamily: 'var(--font-mono)',
         fontSize: '13px',
-        lineHeight: '1.65',
+        lineHeight: '1.6',
       },
-      '.cm-content': {
-        padding: '8px 0',
-        caretColor: 'var(--accent)',
-      },
+      '.cm-content': { padding: '8px 0', caretColor: 'var(--accent)' },
       '.cm-line': { padding: '0 14px' },
       '.cm-gutters': {
         backgroundColor: 'var(--bg)',
@@ -28,30 +22,18 @@ function createTheme(dark) {
         borderRight: '1px solid var(--border)',
         minWidth: '42px',
       },
-      '.cm-lineNumbers .cm-gutterElement': {
-        padding: '0 10px 0 6px',
-        textAlign: 'right',
-      },
+      '.cm-lineNumbers .cm-gutterElement': { padding: '0 10px 0 6px', textAlign: 'right' },
       '.cm-activeLineGutter': { backgroundColor: 'var(--surface-2)' },
-      '.cm-activeLine':       { backgroundColor: 'var(--surface-2)' },
+      '.cm-activeLine': { backgroundColor: 'var(--surface-2)' },
       '&.cm-focused .cm-selectionBackground': {
-        backgroundColor: dark
-          ? 'oklch(28% 0.12 235)'
-          : 'oklch(88% 0.09 235)',
+        backgroundColor: dark ? 'oklch(28% 0.12 235)' : 'oklch(88% 0.09 235)',
       },
       '.cm-selectionBackground': {
-        backgroundColor: dark
-          ? 'oklch(23% 0.08 235)'
-          : 'oklch(91% 0.06 235)',
+        backgroundColor: dark ? 'oklch(23% 0.08 235)' : 'oklch(91% 0.06 235)',
       },
-      '.cm-cursor': {
-        borderLeftColor: 'var(--accent)',
-        borderLeftWidth: '2px',
-      },
+      '.cm-cursor': { borderLeftColor: 'var(--accent)', borderLeftWidth: '2px' },
       '.cm-matchingBracket': {
-        backgroundColor: dark
-          ? 'oklch(26% 0.10 235)'
-          : 'oklch(88% 0.10 235)',
+        backgroundColor: dark ? 'oklch(26% 0.10 235)' : 'oklch(88% 0.10 235)',
         outline: 'none',
         borderRadius: '2px',
       },
@@ -70,17 +52,19 @@ function createTheme(dark) {
   )
 }
 
-export function HtmlEditor({ value, onChange, onViewReady, dark = false }) {
+export function SourceEditor({ value, onChange, dark = false, viewRef }) {
   const extensions = useMemo(() => {
-    const exts = [html()]
+    const exts = [html(), EditorView.lineWrapping]
     if (dark) exts.push(syntaxHighlighting(oneDarkHighlightStyle))
     exts.push(createTheme(dark))
     return exts
   }, [dark])
 
   const handleCreate = useCallback(
-    (view) => { onViewReady?.(view) },
-    [onViewReady],
+    (view) => {
+      if (viewRef) viewRef.current = view
+    },
+    [viewRef],
   )
 
   return (
@@ -89,8 +73,8 @@ export function HtmlEditor({ value, onChange, onViewReady, dark = false }) {
       onChange={onChange}
       extensions={extensions}
       onCreateEditor={handleCreate}
-      height="100%"
-      style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+      height="auto"
+      style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}
       basicSetup={{
         lineNumbers: true,
         foldGutter: false,
