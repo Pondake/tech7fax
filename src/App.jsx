@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Send, Loader2, CheckCircle, AlertCircle, Sun, Moon, Lock, RotateCcw } from 'lucide-react'
 import { Logo } from './components/Logo.jsx'
+import { FaxBackground } from './components/FaxBackground.jsx'
 import { FaxEditor } from './editor/FaxEditor.jsx'
 import { useLock } from './PasswordGate.jsx'
 
@@ -112,6 +113,8 @@ export default function App() {
 
   return (
     <div className="app">
+      <FaxBackground />
+
       <header className="app-header">
         <div className="header-logo">
           <Logo size={20} />
