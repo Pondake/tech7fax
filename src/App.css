@@ -297,7 +297,7 @@ body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  background: var(--bg);
+  background: transparent; /* the raster layer sits behind this; body carries --bg */
   padding: 20px clamp(24px, 4vw, 80px) 48px;
   display: flex;
   justify-content: center;
@@ -534,7 +534,7 @@ body {
   flex: 1;
   overflow: hidden;
   display: flex;
-  background: var(--bg);
+  background: transparent; /* the raster layer sits behind this; body carries --bg */
   padding: 0;
   min-height: 0;
 }
@@ -576,7 +576,7 @@ body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  background: var(--bg);
+  background: transparent; /* the raster layer sits behind this; body carries --bg */
   padding: 20px clamp(20px, 3vw, 56px) 40px 20px;
 }
 .editor-split__preview::-webkit-scrollbar { width: 6px; }
@@ -819,7 +819,7 @@ body {
   inset: 0;
   display: grid;
   place-items: center;
-  background: var(--bg);
+  background: transparent; /* the raster layer sits behind this; body carries --bg */
   padding: 24px;
 }
 .gate-card {
@@ -896,3 +896,77 @@ body {
 .gate-submit:hover:not(:disabled) { background: var(--accent-hover); }
 .gate-submit:active:not(:disabled) { transform: scale(0.97); }
 .gate-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ─── Generative background: drifting fax sheets ─────────────────────────── */
+/* Colour lives here, not on the component: the whole field inherits this one
+   value through `currentColor`. Warm greys, so the sheets read as paper rather
+   than as a blue UI graphic. */
+.fax-bg {
+  position: fixed;
+  /* Larger than the viewport by more than one tile, so the drift below never
+     exposes an edge. */
+  inset: -120px;
+  z-index: -10;
+  pointer-events: none;
+  contain: layout paint;
+  color: oklch(38% 0.020 65);
+
+  --fax-bg-field: 0.08;
+  --fax-bg-leaf-peak: 0.18;
+
+  -webkit-mask-image: radial-gradient(ellipse 120% 85% at 50% 0%, #000 14%, transparent 80%);
+  mask-image: radial-gradient(ellipse 120% 85% at 50% 0%, #000 14%, transparent 80%);
+}
+:root[data-theme="dark"] .fax-bg {
+  color: oklch(78% 0.018 65);
+  --fax-bg-field: 0.09;
+}
+
+/* The gate is one card on an otherwise empty screen and carries the field at
+   full strength; the editor is already a sheet of paper under a toolbar, and
+   the same strength reads as clutter behind it. */
+.fax-bg--hero {
+  --fax-bg-field: 0.14;
+  --fax-bg-leaf-peak: 0.32;
+}
+:root[data-theme="dark"] .fax-bg--hero { --fax-bg-field: 0.13; }
+
+.fax-bg__field {
+  width: 100%;
+  height: 100%;
+  animation: fax-bg-drift 240s linear infinite;
+  will-change: transform;
+}
+
+.fax-bg__field-fill { opacity: var(--fax-bg-field); }
+
+/* Exactly one tile per cycle, which is what makes the loop invisible. The tile
+   is a scatter of whole sheets rather than a raster, so it is large — hence the
+   long cycle: at 90s the same one-tile step would be a visible slide. */
+@keyframes fax-bg-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, var(--fax-bg-tile-h), 0); }
+}
+
+/* A page lifting off the pile and settling back. It turns about its own spine,
+   so `transform-box: fill-box` is what makes the origin the sheet's bottom-left
+   corner instead of the corner of the whole SVG. */
+.fax-bg__leaf {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 0% 100%;
+  animation: fax-bg-leaf 34s ease-in-out infinite;
+}
+
+@keyframes fax-bg-leaf {
+  0%, 100% { opacity: 0; transform: rotate(0deg); }
+  6%       { opacity: var(--fax-bg-leaf-peak); transform: rotate(-1deg); }
+  16%      { opacity: var(--fax-bg-leaf-peak); transform: rotate(-9deg); }
+  26%      { opacity: 0; transform: rotate(-15deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fax-bg__field,
+  .fax-bg__leaf { animation: none; }
+  .fax-bg__leaf { opacity: 0; }
+}
