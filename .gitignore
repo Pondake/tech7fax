@@ -42,3 +42,11 @@ CLAUDE.md
 .rovodev/
 .trae/
 .trae-cn/
+
+# Backlog hoort niet in deze repo
+/BACKLOG.md
+/backlog.md
+/docs/BACKLOG.md
+/docs/backlog.md
+/docs/backlog-*.md
+/docs/FEATURE_BACKLOG.md
