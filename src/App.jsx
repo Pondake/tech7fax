@@ -8,6 +8,7 @@ import { useLock } from './PasswordGate.jsx'
 
 const FAX_ENDPOINT = import.meta.env.VITE_FAX_ENDPOINT ?? '/api'
 const FAX_API_KEY = import.meta.env.VITE_FAX_API_KEY ?? ''
+const FAX_SENDER = import.meta.env.VITE_FAX_SENDER ?? ''
 const SEND_SIDE_PADDING = '18mm'
 
 const today = new Date().toLocaleDateString('en-GB', {
@@ -96,7 +97,7 @@ export default function App() {
         },
         body: JSON.stringify({
           content: `<style>html,body{margin:0;padding:0;overflow:hidden;}</style><div style="padding:0 ${SEND_SIDE_PADDING};">${prepareForSend(htmlContent)}</div>`,
-          sender: 'SENDER',
+          sender: FAX_SENDER,
         }),
       })
       if (!res.ok) {

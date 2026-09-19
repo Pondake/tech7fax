@@ -27,7 +27,7 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Claude / AI tooling
+# Local tooling and assistant config
 CLAUDE.md
 .claude/
 .claude-plugin/
