@@ -57,11 +57,7 @@ export function HtmlToolbar({ onUpload, onCopyHtml, mode, onModeChange }) {
         <Copy size={13} />
         <span className="tb-btn__label">{t('copy_html')}</span>
       </Btn>
-      <div
-        className="html-mode-toggle"
-        role="group"
-        aria-label="Editor mode"
-      >
+      <div className="html-mode-toggle" role="group" aria-label="Editor mode">
         <button
           className={`html-mode-toggle__btn${mode === 'visual' ? ' html-mode-toggle__btn--active' : ''}`}
           onClick={() => onModeChange('visual')}

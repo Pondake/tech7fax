@@ -83,7 +83,10 @@ export function FaxEditor({ value, onChange, dark = false, onImageUpdate }) {
   return (
     <div className={`fax-editor fax-editor--${mode}`}>
       {/* Floating pill mode switcher — shifts left when sidebar is visible to avoid overlap */}
-      <div className="mode-bar" style={images.length > 0 ? { right: 'calc(196px + 1rem)' } : undefined}>
+      <div
+        className="mode-bar"
+        style={images.length > 0 ? { right: 'calc(196px + 1rem)' } : undefined}
+      >
         <div className="mode-pill" role="group" aria-label="Editor mode">
           <button
             className={`mode-pill-btn${mode === 'visual' ? ' mode-pill-btn--active' : ''}`}
@@ -124,7 +127,12 @@ export function FaxEditor({ value, onChange, dark = false, onImageUpdate }) {
             <div className="html-split-wrap">
               <div className="editor-split">
                 <div className="editor-split__left">
-                  <HtmlToolbar onUpload={handleUpload} onCopyHtml={handleCopyHtml} mode={mode} onModeChange={switchMode} />
+                  <HtmlToolbar
+                    onUpload={handleUpload}
+                    onCopyHtml={handleCopyHtml}
+                    mode={mode}
+                    onModeChange={switchMode}
+                  />
                   <div className="editor-split__code">
                     <SourceEditor
                       value={value}

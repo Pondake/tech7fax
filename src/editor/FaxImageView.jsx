@@ -64,7 +64,11 @@ export function FaxImageView({ node, updateAttributes, selected }) {
         className={`fax-image${isFullpage ? ' fax-image--fullpage' : ''}`}
         style={figStyle}
       >
-        <img src={src} alt={alt || ''} style={{ width: '100%', height: 'auto', display: 'block' }} />
+        <img
+          src={src}
+          alt={alt || ''}
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+        />
 
         {/* Float + rotate controls: appear when node is selected */}
         {selected && (

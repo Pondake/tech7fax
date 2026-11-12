@@ -1,69 +1,66 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Lock, AlertCircle } from "lucide-react";
-import { Logo } from "./components/Logo.jsx";
-import { FaxBackground } from "./components/FaxBackground.jsx";
-import { LockContext } from "./lockContext.js";
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { Lock, AlertCircle } from 'lucide-react'
+import { Logo } from './components/Logo.jsx'
+import { FaxBackground } from './components/FaxBackground.jsx'
+import { LockContext } from './lockContext.js'
 
-const SITE_PASSWORD = import.meta.env.VITE_SITE_PASSWORD ?? "";
-const STORAGE_KEY = "tech7fax:auth";
+const SITE_PASSWORD = import.meta.env.VITE_SITE_PASSWORD ?? ''
+const STORAGE_KEY = 'tech7fax:auth'
 
 export function PasswordGate({ children }) {
   const [authed, setAuthed] = useState(() => {
-    if (!SITE_PASSWORD) return false;
+    if (!SITE_PASSWORD) return false
     try {
-      return sessionStorage.getItem(STORAGE_KEY) === SITE_PASSWORD;
+      return sessionStorage.getItem(STORAGE_KEY) === SITE_PASSWORD
     } catch {
-      return false;
+      return false
     }
-  });
-  const [value, setValue] = useState("");
-  const [error, setError] = useState(false);
-  const [shake, setShake] = useState(false);
-  const inputRef = useRef(null);
+  })
+  const [value, setValue] = useState('')
+  const [error, setError] = useState(false)
+  const [shake, setShake] = useState(false)
+  const inputRef = useRef(null)
 
   useEffect(() => {
-    if (!authed) inputRef.current?.focus();
-  }, [authed]);
+    if (!authed) inputRef.current?.focus()
+  }, [authed])
 
   const lock = useCallback(() => {
     try {
-      sessionStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY)
     } catch {
       /* ignore */
     }
-    setValue("");
-    setError(false);
-    setAuthed(false);
-  }, []);
+    setValue('')
+    setError(false)
+    setAuthed(false)
+  }, [])
 
   if (authed) {
-    return <LockContext.Provider value={lock}>{children}</LockContext.Provider>;
+    return <LockContext.Provider value={lock}>{children}</LockContext.Provider>
   }
 
   const submit = (e) => {
-    e.preventDefault();
+    e.preventDefault()
     if (SITE_PASSWORD && value === SITE_PASSWORD) {
       try {
-        sessionStorage.setItem(STORAGE_KEY, SITE_PASSWORD);
+        sessionStorage.setItem(STORAGE_KEY, SITE_PASSWORD)
       } catch {
         /* ignore */
       }
-      setAuthed(true);
+      setAuthed(true)
     } else {
-      setError(true);
-      setShake(true);
-      setValue("");
-      setTimeout(() => setShake(false), 400);
+      setError(true)
+      setShake(true)
+      setValue('')
+      setTimeout(() => setShake(false), 400)
     }
-  };
+  }
 
   return (
     <div className="gate">
       <FaxBackground hero />
-      <form
-        className={`gate-card${shake ? " gate-card--shake" : ""}`}
-        onSubmit={submit}
-      >
+      <form className={`gate-card${shake ? ' gate-card--shake' : ''}`} onSubmit={submit}>
         <div className="gate-logo">
           <Logo size={28} />
           tech7fax
@@ -75,11 +72,11 @@ export function PasswordGate({ children }) {
           id="gate-pw"
           ref={inputRef}
           type="password"
-          className={`gate-input${error ? " gate-input--error" : ""}`}
+          className={`gate-input${error ? ' gate-input--error' : ''}`}
           value={value}
           onChange={(e) => {
-            setValue(e.target.value);
-            if (error) setError(false);
+            setValue(e.target.value)
+            if (error) setError(false)
           }}
           autoComplete="current-password"
           spellCheck={false}
@@ -94,5 +91,5 @@ export function PasswordGate({ children }) {
         </button>
       </form>
     </div>
-  );
+  )
 }

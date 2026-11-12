@@ -47,8 +47,17 @@ export const FaxImage = Node.create({
   },
 
   renderHTML({ node }) {
-    const { src, alt, faxId, mode, width, float: floatAttr, marginLeft, marginRight, rotation } =
-      node.attrs
+    const {
+      src,
+      alt,
+      faxId,
+      mode,
+      width,
+      float: floatAttr,
+      marginLeft,
+      marginRight,
+      rotation,
+    } = node.attrs
     const isFullpage = mode === 'fullpage'
 
     const styles = [

@@ -22,11 +22,11 @@ export function Logo({ size = 20 }) {
       <rect x="8" y="9" width="12" height="2" rx="0" fill="currentColor" opacity="0.22" />
 
       {/* keypad dots */}
-      <circle cx="9.5"  cy="16" r="1.3" fill="currentColor" opacity="0.22" />
-      <circle cx="14"   cy="16" r="1.3" fill="currentColor" opacity="0.22" />
+      <circle cx="9.5" cy="16" r="1.3" fill="currentColor" opacity="0.22" />
+      <circle cx="14" cy="16" r="1.3" fill="currentColor" opacity="0.22" />
       <circle cx="18.5" cy="16" r="1.3" fill="currentColor" opacity="0.22" />
-      <circle cx="9.5"  cy="20" r="1.3" fill="currentColor" opacity="0.22" />
-      <circle cx="14"   cy="20" r="1.3" fill="currentColor" opacity="0.22" />
+      <circle cx="9.5" cy="20" r="1.3" fill="currentColor" opacity="0.22" />
+      <circle cx="14" cy="20" r="1.3" fill="currentColor" opacity="0.22" />
       <circle cx="18.5" cy="20" r="1.3" fill="currentColor" opacity="0.22" />
 
       {/* status bar */}
