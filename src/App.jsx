@@ -6,9 +6,8 @@ import { FaxBackground } from './components/FaxBackground.jsx'
 import { FaxEditor } from './editor/FaxEditor.jsx'
 import { useLock } from './lockContext.js'
 
-const FAX_ENDPOINT = import.meta.env.VITE_FAX_ENDPOINT ?? '/api'
-const FAX_API_KEY = import.meta.env.VITE_FAX_API_KEY ?? ''
-const FAX_SENDER = import.meta.env.VITE_FAX_SENDER ?? ''
+// Same-origin serverless proxy; the fax endpoint, API key and sender live in server env only.
+const SEND_URL = '/api/send'
 const SEND_SIDE_PADDING = '18mm'
 
 const today = new Date().toLocaleDateString('en-GB', {
@@ -89,20 +88,22 @@ export default function App() {
     if (sendStatus === 'sending') return
     setSend('sending')
     try {
-      const res = await fetch(`${FAX_ENDPOINT}/html`, {
+      const res = await fetch(SEND_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(FAX_API_KEY ? { Authorization: `Bearer ${FAX_API_KEY}` } : {}),
-        },
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           content: `<style>html,body{margin:0;padding:0;overflow:hidden;}</style><div style="padding:0 ${SEND_SIDE_PADDING};">${prepareForSend(htmlContent)}</div>`,
-          sender: FAX_SENDER,
         }),
       })
+      if (res.status === 401) {
+        // Session expired or missing: back to the login screen.
+        lock()
+        return
+      }
       if (!res.ok) {
-        const text = await res.text().catch(() => res.statusText)
-        setSend({ ok: false, msg: `${res.status}: ${text}` })
+        const data = await res.json().catch(() => ({}))
+        setSend({ ok: false, msg: `${res.status}: ${data.error ?? res.statusText}` })
       } else {
         setSend({ ok: true })
         setTimeout(() => setSend(null), 6000)
@@ -110,7 +111,7 @@ export default function App() {
     } catch (err) {
       setSend({ ok: false, msg: err.message })
     }
-  }, [htmlContent, sendStatus])
+  }, [htmlContent, sendStatus, lock])
 
   return (
     <div className="app">

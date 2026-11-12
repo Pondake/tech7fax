@@ -4,35 +4,43 @@ import { Logo } from './components/Logo.jsx'
 import { FaxBackground } from './components/FaxBackground.jsx'
 import { LockContext } from './lockContext.js'
 
-const SITE_PASSWORD = import.meta.env.VITE_SITE_PASSWORD ?? ''
-const STORAGE_KEY = 'tech7fax:auth'
+// The password is checked server-side; the session lives in an HttpOnly cookie
+// the page cannot read, so we ask the server whether one exists.
+const LOGIN_ERRORS = {
+  401: 'Incorrect password',
+  429: 'Too many attempts. Try again later.',
+}
 
 export function PasswordGate({ children }) {
-  const [authed, setAuthed] = useState(() => {
-    if (!SITE_PASSWORD) return false
-    try {
-      return sessionStorage.getItem(STORAGE_KEY) === SITE_PASSWORD
-    } catch {
-      return false
-    }
-  })
+  // null while the session check is pending.
+  const [authed, setAuthed] = useState(null)
   const [value, setValue] = useState('')
-  const [error, setError] = useState(false)
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
   const [shake, setShake] = useState(false)
   const inputRef = useRef(null)
 
   useEffect(() => {
-    if (!authed) inputRef.current?.focus()
+    let cancelled = false
+    fetch('/api/session', { credentials: 'same-origin' })
+      .then((res) => (res.ok ? res.json() : { authenticated: false }))
+      .catch(() => ({ authenticated: false }))
+      .then((data) => {
+        if (!cancelled) setAuthed(data.authenticated === true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (authed === false) inputRef.current?.focus()
   }, [authed])
 
-  const lock = useCallback(() => {
-    try {
-      sessionStorage.removeItem(STORAGE_KEY)
-    } catch {
-      /* ignore */
-    }
+  const lock = useCallback(async () => {
+    await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {})
     setValue('')
-    setError(false)
+    setError('')
     setAuthed(false)
   }, [])
 
@@ -40,21 +48,40 @@ export function PasswordGate({ children }) {
     return <LockContext.Provider value={lock}>{children}</LockContext.Provider>
   }
 
-  const submit = (e) => {
+  if (authed === null) {
+    return (
+      <div className="gate">
+        <FaxBackground hero />
+      </div>
+    )
+  }
+
+  const submit = async (e) => {
     e.preventDefault()
-    if (SITE_PASSWORD && value === SITE_PASSWORD) {
-      try {
-        sessionStorage.setItem(STORAGE_KEY, SITE_PASSWORD)
-      } catch {
-        /* ignore */
-      }
-      setAuthed(true)
-    } else {
-      setError(true)
-      setShake(true)
-      setValue('')
-      setTimeout(() => setShake(false), 400)
+    if (!value || busy) return
+    setBusy(true)
+    let status = 0
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: value }),
+      })
+      status = res.status
+    } catch {
+      /* network error: status stays 0 */
     }
+    setBusy(false)
+    if (status === 200) {
+      setValue('')
+      setAuthed(true)
+      return
+    }
+    setError(LOGIN_ERRORS[status] ?? 'Login is unavailable right now')
+    setShake(true)
+    setValue('')
+    setTimeout(() => setShake(false), 400)
   }
 
   return (
@@ -76,18 +103,19 @@ export function PasswordGate({ children }) {
           value={value}
           onChange={(e) => {
             setValue(e.target.value)
-            if (error) setError(false)
+            if (error) setError('')
           }}
           autoComplete="current-password"
           spellCheck={false}
+          disabled={busy}
         />
         {error && (
-          <div className="gate-error">
-            <AlertCircle size={12} /> Incorrect password
+          <div className="gate-error" role="alert">
+            <AlertCircle size={12} /> {error}
           </div>
         )}
-        <button type="submit" className="gate-submit" disabled={!value}>
-          Unlock
+        <button type="submit" className="gate-submit" disabled={!value || busy}>
+          {busy ? 'Checking…' : 'Unlock'}
         </button>
       </form>
     </div>
