@@ -4,7 +4,7 @@ import { Send, Loader2, CheckCircle, AlertCircle, Sun, Moon, Lock, RotateCcw } f
 import { Logo } from './components/Logo.jsx'
 import { FaxBackground } from './components/FaxBackground.jsx'
 import { FaxEditor } from './editor/FaxEditor.jsx'
-import { useLock } from './PasswordGate.jsx'
+import { useLock } from './lockContext.js'
 
 const FAX_ENDPOINT = import.meta.env.VITE_FAX_ENDPOINT ?? '/api'
 const FAX_API_KEY = import.meta.env.VITE_FAX_API_KEY ?? ''

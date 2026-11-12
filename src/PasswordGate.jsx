@@ -1,16 +1,11 @@
-import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Lock, AlertCircle } from "lucide-react";
 import { Logo } from "./components/Logo.jsx";
 import { FaxBackground } from "./components/FaxBackground.jsx";
+import { LockContext } from "./lockContext.js";
 
 const SITE_PASSWORD = import.meta.env.VITE_SITE_PASSWORD ?? "";
 const STORAGE_KEY = "tech7fax:auth";
-
-const LockContext = createContext(() => {});
-
-export function useLock() {
-  return useContext(LockContext);
-}
 
 export function PasswordGate({ children }) {
   const [authed, setAuthed] = useState(() => {

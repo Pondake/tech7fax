@@ -104,5 +104,5 @@ export const INTERACTIVE_SCRIPT = `
   scan();
   new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });
 })();
-<\/script>
+</script>
 `
